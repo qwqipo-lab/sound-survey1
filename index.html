@@ -88,6 +88,7 @@
 
 <body>
 
+<!-- 1페이지 -->
 <div class="page active" id="page1">
   <h2>인적사항</h2>
 
@@ -103,34 +104,54 @@
   <input type="text" id="location" placeholder="장소">
   <input type="tel" id="phone" placeholder="전화번호">
 
-  <button onclick="nextPage(2)">다음</button>
+  
+  <button onclick="goToPage2()">다음</button>
 </div>
 
+<!-- 2페이지 -->
 <div class="page" id="page2">
   <h2>사운드스케이프 평가</h2>
-
   <div id="questions"></div>
-
   <button onclick="submitSurvey()">제출</button>
 </div>
 
+<!-- 3페이지 -->
 <div class="page" id="page3">
   <h2>설문 완료</h2>
   <p>설문에 응답해주셔서 감사합니다.</p>
 </div>
 
+<!-- supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
+//  supabase 연결
 const supabaseUrl = "https://pjhrbjgnbpzpqwbtvyuo.supabase.co";
 const supabaseKey = "sb_publishable_Vzz3APYKcSJGeeg65puobw_roEKD6tt";
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
+//  페이지 이동
 function nextPage(pageNum) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page' + pageNum).classList.add('active');
 }
 
+//  1페이지 검증 
+function goToPage2() {
+  const name = document.getElementById("name").value;
+  const age = document.getElementById("age").value;
+  const gender = document.getElementById("gender").value;
+  const location = document.getElementById("location").value;
+
+  if (!name || !age || !gender || !location) {
+    alert("이름, 나이, 성별, 장소는 필수 입력입니다.");
+    return;
+  }
+
+  nextPage(2);
+}
+
+// 질문 리스트
 const soundQuestions = [
   "쾌적하다 - 불쾌하다",
   "조용하다 - 시끄럽다",
@@ -144,6 +165,7 @@ const soundQuestions = [
 
 const container = document.getElementById('questions');
 
+// 슬라이더 생성
 soundQuestions.forEach((q, index) => {
   const div = document.createElement('div');
   div.className = "question";
@@ -169,7 +191,7 @@ soundQuestions.forEach((q, index) => {
   container.appendChild(div);
 });
 
-// 제출 함수 
+// 제출 함수
 async function submitSurvey() {
   const name = document.getElementById("name").value;
   const age = document.getElementById("age").value;
@@ -177,19 +199,10 @@ async function submitSurvey() {
   const location = document.getElementById("location").value;
   const phone = document.getElementById("phone").value;
 
-  // 입력 검증 
-  if (!name || !age || !gender) {
-    alert("이름, 나이, 성별은 필수 입력입니다.");
-    return;
-  }
-
   let answers = [];
   for (let i = 0; i < 8; i++) {
     answers.push(document.getElementById("q" + i).value);
   }
-
-  console.log("이름:", name);
-  console.log("사운드 응답:", answers);
 
   const { data, error } = await supabaseClient
     .from('survey')
