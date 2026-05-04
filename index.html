@@ -2,88 +2,12 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>사운드스케이프 설문</title>
 
-  <style>
-    body {
-      font-family: 'Segoe UI', Arial;
-      max-width: 600px;
-      margin: 40px auto;
-      background: #f5f7fa;
-    }
-
-    .page {
-      display: none;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-
-    .active {
-      display: block;
-    }
-
-    h2 {
-      border-bottom: 2px solid #007BFF;
-      padding-bottom: 10px;
-    }
-
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-
-    button {
-      width: 100%;
-      padding: 12px;
-      background: #007BFF;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #0056b3;
-    }
-
-    .question {
-      margin: 20px 0;
-    }
-
-    .slider-container {
-      margin-top: 10px;
-    }
-
-    .slider-numbers {
-      display: flex;
-      justify-content: space-between;
-      padding: 0 5px;
-      font-size: 12px;
-    }
-
-    .slider-numbers span {
-      width: 100%;
-      text-align: center;
-    }
-
-    input[type="range"] {
-      width: 100%;
-      margin: 5px 0;
-    }
-
-    .range-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #555;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="script.js" defer></script>
 </head>
 
 <body>
@@ -93,7 +17,11 @@
   <h2>인적사항</h2>
 
   <input type="text" id="name" placeholder="이름">
-  <input type="number" id="age" placeholder="나이">
+
+  <!-- 년생 -->
+  <select id="age">
+    <option value="">출생년도 선택</option>
+  </select>
 
   <select id="gender">
     <option value="">성별 선택</option>
@@ -101,10 +29,14 @@
     <option>여</option>
   </select>
 
-  <input type="text" id="location" placeholder="장소">
+  <!-- 장소 -->
+  <select id="location">
+    <option value="">장소 선택</option>
+    <option>충남대학교 쪽문</option>
+  </select>
+
   <input type="tel" id="phone" placeholder="전화번호">
 
-  
   <button onclick="goToPage2()">다음</button>
 </div>
 
@@ -112,120 +44,15 @@
 <div class="page" id="page2">
   <h2>사운드스케이프 평가</h2>
   <div id="questions"></div>
+
   <button onclick="submitSurvey()">제출</button>
 </div>
 
 <!-- 3페이지 -->
 <div class="page" id="page3">
   <h2>설문 완료</h2>
-  <p>설문에 응답해주셔서 감사합니다.</p>
+  <p>감사합니다.</p>
 </div>
-
-<!-- supabase -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<script>
-//  supabase 연결
-const supabaseUrl = "https://pjhrbjgnbpzpqwbtvyuo.supabase.co";
-const supabaseKey = "sb_publishable_Vzz3APYKcSJGeeg65puobw_roEKD6tt";
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-
-//  페이지 이동
-function nextPage(pageNum) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page' + pageNum).classList.add('active');
-}
-
-//  1페이지 검증 
-function goToPage2() {
-  const name = document.getElementById("name").value;
-  const age = document.getElementById("age").value;
-  const gender = document.getElementById("gender").value;
-  const location = document.getElementById("location").value;
-
-  if (!name || !age || !gender || !location) {
-    alert("이름, 나이, 성별, 장소는 필수 입력입니다.");
-    return;
-  }
-
-  nextPage(2);
-}
-
-// 질문 리스트
-const soundQuestions = [
-  "쾌적하다 - 불쾌하다",
-  "조용하다 - 시끄럽다",
-  "자연적이다 - 인공적이다",
-  "편안하다 - 불편하다",
-  "조화롭다 - 혼란스럽다",
-  "안정적이다 - 불안정하다",
-  "매력적이다 - 비매력적이다",
-  "집중이 잘 된다 - 방해된다"
-];
-
-const container = document.getElementById('questions');
-
-// 슬라이더 생성
-soundQuestions.forEach((q, index) => {
-  const div = document.createElement('div');
-  div.className = "question";
-
-  div.innerHTML = `
-    <label>${q}</label>
-
-    <div class="slider-container">
-      <div class="slider-numbers">
-        <span>1</span><span>2</span><span>3</span><span>4</span>
-        <span>5</span><span>6</span><span>7</span><span>8</span>
-      </div>
-
-      <input type="range" min="1" max="8" value="4" id="q${index}">
-      
-      <div class="range-label">
-        <span>${q.split(" - ")[1]}</span>
-        <span>${q.split(" - ")[0]}</span>
-      </div>
-    </div>
-  `;
-
-  container.appendChild(div);
-});
-
-// 제출 함수
-async function submitSurvey() {
-  const name = document.getElementById("name").value;
-  const age = document.getElementById("age").value;
-  const gender = document.getElementById("gender").value;
-  const location = document.getElementById("location").value;
-  const phone = document.getElementById("phone").value;
-
-  let answers = [];
-  for (let i = 0; i < 8; i++) {
-    answers.push(document.getElementById("q" + i).value);
-  }
-
-  const { data, error } = await supabaseClient
-    .from('survey')
-    .insert([
-      {
-        name,
-        age,
-        gender,
-        location,
-        phone,
-        answers: JSON.stringify(answers)
-      }
-    ]);
-
-  if (error) {
-    alert("저장 실패!");
-    console.error(error);
-  } else {
-    alert("저장 성공!");
-    nextPage(3);
-  }
-}
-</script>
 
 </body>
 </html>
